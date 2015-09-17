@@ -2,6 +2,7 @@ function tex_int, ti
     if n_elements(ti) gt 1 then begin
         res = strarr(n_elements(ti))
         for ii=0, n_elements(ti)-1 do res[ii] = tex_int(ti[ii])
+        return, res
     endif else begin
         i = long(ti)
         if i eq 0 then return, '0'
