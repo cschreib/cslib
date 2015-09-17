@@ -10,7 +10,9 @@
 ;  - min_sample: the minimum sample size for each slice
 ;  - xr: range in X within which to restrict the median computation
 ;
-function slidemed, x_data, y_data, num_pts=num_pts, sample_size=sample_size, perc=perc, min_sample=min_sample, xr=xr
+function slidemed, x_data, y_data, num_pts=num_pts, sample_size=sample_size, perc=perc, $
+    min_sample=min_sample, xr=xr, nbstrap=nbstrap, seed=seed
+
     gid = where(finite(x_data) and finite(y_data))
 
     if ~provided(xr) then xr = [min(x_data[gid]), max(x_data[gid])]
@@ -26,6 +28,7 @@ function slidemed, x_data, y_data, num_pts=num_pts, sample_size=sample_size, per
     step = width/(num_pts - 1.0)
 
     med  = fltarr(num_pts)
+    nsrc  = lonarr(num_pts)
     low  = fltarr(num_pts)
     up   = fltarr(num_pts)
     xtab = rgen(xr[0], xr[1], num_pts)
@@ -34,7 +37,13 @@ function slidemed, x_data, y_data, num_pts=num_pts, sample_size=sample_size, per
         ; Build the local sample
         local_ids = where(abs(x_data[gid] - xtab[i]) le sample, cnt)
         if cnt le min_sample then begin
-            if min_sample eq 0 then continue
+            if min_sample eq 0 then begin
+                med[i] = !values.f_nan
+                up[i] = !values.f_nan
+                low[i] = !values.f_nan
+                continue
+            endif
+
             local_sample = sample
             while n_elements(local_ids) le min_sample do begin
                 if local_sample ge width then break
@@ -46,12 +55,29 @@ function slidemed, x_data, y_data, num_pts=num_pts, sample_size=sample_size, per
 
         local_ids = gid[local_ids]
 
-        ; Compute the median and percentiles
+        ; Compute the median
         sorted = local_ids[sort(y_data[local_ids])]
-        low[i] = percentile(y_data[sorted], 1.0 - perc, /no_sort)
         med[i] = percentile(y_data[sorted], 0.5, /no_sort)
-        up[i]  = percentile(y_data[sorted], perc, /no_sort)
+        nsrc[i] = n_elements(local_ids)
+
+        if n_elements(nbstrap) eq 0 then begin
+            ; Compute percentiles
+            low[i] = percentile(y_data[sorted], 1.0 - perc, /no_sort)
+            up[i]  = percentile(y_data[sorted], perc, /no_sort)
+        endif else begin
+            ; Bootstrap to get uncertainty on median
+            tmed = fltarr(nbstrap)
+            for j=0, nbstrap-1 do begin
+                sid = shuffle(sorted, num_ids=n_elements(sorted)/2, seed=seed)
+                tmed[j] = percentile(y_data[sid], 0.5, /no_sort)
+            endfor
+
+            ssid = sort(tmed)
+            tmed = tmed[ssid]
+            low[i] = (percentile(tmed, 1.0 - perc, /no_sort) - med[i])/sqrt(2) + med[i]
+            up[i] = (percentile(tmed, perc, /no_sort) - med[i])/sqrt(2) + med[i]
+        endelse
     endfor
 
-    return, {x:xtab, med:med, low:low, up:up}
+    return, {x:xtab, med:med, low:low, up:up, nsrc:nsrc}
 end
