@@ -24,6 +24,7 @@ function slidemean, x_data, y_data, num_pts=num_pts, sample_size=sample_size, mi
     step = width/(num_pts - 1.0)
 
     mea  = fltarr(num_pts)
+    nsrc = lonarr(num_pts)
     xtab = rgen(xr[0], xr[1], num_pts)
 
     for i=0, num_pts-1 do begin
@@ -44,7 +45,8 @@ function slidemean, x_data, y_data, num_pts=num_pts, sample_size=sample_size, mi
 
         ; Compute the mean
         mea[i] = mean(y_data[local_ids])
+        nsrc[i] = n_elements(local_ids)
     endfor
 
-    return, {x:xtab, mean:mea}
+    return, {x:xtab, mean:mea, nsrc:nsrc}
 end
