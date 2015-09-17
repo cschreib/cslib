@@ -1,10 +1,10 @@
-pro band_shade, x, horizontal=horizontal, color=color, style=style
+pro band_shade, x, y, horizontal=horizontal, color=color, style=style
     nb = n_elements(x)/2
     if ~provided(color) then tcolor = color_invert(!p.background) else tcolor = color
     if ~provided(style) then tstyle = 0 else tstyle = style
     if n_elements(tcolor) lt nb then tcolor = [tcolor, replicate(tcolor[n_elements(tcolor)-1], nb - n_elements(tcolor))]
     if n_elements(tstyle) lt nb then tstyle = [tstyle, replicate(tstyle[n_elements(tstyle)-1], nb - n_elements(tstyle))]
-    
+
     line_fill = intarr(nb)
     orientation = fltarr(nb)
     for i=0, nb-1 do begin
@@ -25,7 +25,7 @@ pro band_shade, x, horizontal=horizontal, color=color, style=style
         end
         endcase
     endfor
-    
+
     xma = max(!x.crange) & xmi = min(!x.crange)
     yma = max(!y.crange) & ymi = min(!y.crange)
     if !x.type eq 1 then begin
@@ -35,11 +35,16 @@ pro band_shade, x, horizontal=horizontal, color=color, style=style
     if !y.type eq 1 then begin
         ymi = 10d0^ymi
         yma = 10d0^yma
-    endif 
-    
+    endif
+
+    if n_elements(y) eq 2 then begin
+        ymi = y[0]
+        yma = y[1]
+    endif
+
     if keyword_set(horizontal) then begin
         xpoly = [xmi, xma, xma, xmi]
-        
+
         for i=0, nb-1 do begin
             ypoly = clamp(x[2*i + [0,0,1,1]], ymi, yma)
             if line_fill[i] then begin
@@ -50,7 +55,7 @@ pro band_shade, x, horizontal=horizontal, color=color, style=style
         endfor
     endif else begin
         ypoly = [ymi, yma, yma, ymi]
-        
+
         for i=0, nb-1 do begin
             xpoly = clamp(x[2*i + [0,0,1,1]], xmi, xma)
             if line_fill[i] then begin
