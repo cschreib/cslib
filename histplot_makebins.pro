@@ -88,7 +88,21 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
                 if arg_present(errors) then begin
                     errors[b] = sqrt(total(tweight[ids]^2))
                 endif
-                ydata[b] = total(tweight[ids])
+
+                factor = 1.0
+                if provided(perbin) then begin
+                    if size(perbin, /type) ge 1 and size(perbin, /type) le 3 then begin
+                        if perbin ne 0 then begin
+                            factor = (bins.up[b] - bins.low[b])
+                        endif
+                    endif else if size(perbin, /type) eq 7 then begin
+                        void = execute('factor = '+perbin+'(bins.low[b], bins.up[b])')
+                    endif else begin
+                        message, 'unexpected type for "perbin" keyword, need string or integer'
+                    endelse
+                endif
+
+                ydata[b] = total(tweight[ids])/factor
             endif
         endfor
     endif else begin
