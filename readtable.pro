@@ -16,47 +16,47 @@
 ;           with tags named after these names, containing the associated column data. Setting this
 ;           keyword automatically enables the 'as_string' flag.
 ;  - types: type of each column that is read. Only used if 'names' is provided. See 'as_string' for
-;           the default behavior. Accepted types: 'I' (fix), 'L' (long), 'F' (float), 'D' (double), 
+;           the default behavior. Accepted types: 'I' (fix), 'L' (long), 'F' (float), 'D' (double),
 ;           'S' (string), '' (default type). Note that if one wants to obtain string values ('S'),
 ;           one has to set the 'as_string' keyword (it will also be faster in any case).
 ;
 function readtable, file, numcol=numcol, names=names, types=types, skip=skip, as_string=as_string
     openr, lun, file, /get_lun
-    
+
     ; Skip the first lines if asked
-    if provided(skip) then skip_lun, lun, skip, /lines
-    
+    if n_elements(skip) ne 0 then skip_lun, lun, skip, /lines
+
     ; Store the starting position
     point_lun, -lun, stpos
-    
+
     ; Find the total number of line
     nline = 0L
     while ~eof(lun) do begin
         nline++
         skip_lun, lun, 1, /lines
     endwhile
-    
+
     point_lun, lun, stpos
-    
+
     ; Find the total number of collumn
-    if provided(names) then begin
+    if n_elements(names) ne 0 then begin
         numcol = n_elements(names)
-        if ~provided(as_string) then as_string = 1
+        if n_elements(as_string) eq 0 then as_string = 1
     endif
-    
-    if ~provided(numcol) then begin
+
+    if n_elements(numcol) eq 0 then begin
         line = ''
         while line eq '' and ~eof(lun) do begin
             point_lun, -lun, stpos
             readf, lun, line
         endwhile
-        
+
         if eof(lun) then return, -1
-        
+
         numcol = n_elements(strsplit(line))
         point_lun, lun, stpos
     endif
-    
+
     ; Begin the extraction
     if keyword_set(as_string) then begin
         res = strarr(numcol, nline)
@@ -76,9 +76,9 @@ function readtable, file, numcol=numcol, names=names, types=types, skip=skip, as
             vals = strsplit(line, /extract)
             if n_elements(vals) lt numcol then vals = [vals, replicate('0.0', numcol - n_elements(vals))]
             if n_elements(vals) gt numcol then vals = vals[lindgen(numcol)]
-            
+
             valid = 0
-            on_ioerror, bad_num 
+            on_ioerror, bad_num
             res[*,l] = vals
             valid = 1
             bad_num: if ~valid then begin
@@ -92,11 +92,11 @@ function readtable, file, numcol=numcol, names=names, types=types, skip=skip, as
             end
         endfor
     endelse
-      
+
     free_lun, lun
-    
-    if provided(names) then begin
-        if provided(types) then begin
+
+    if n_elements(names) ne 0 then begin
+        if n_elements(types) ne 0 then begin
             if n_elements(types) ne n_elements(names) then message, "error: 'names' and 'types' must have identical sizes"
             ntypes = types
             idi = where(types eq 'I', cnt) & if cnt ne 0 then ntypes[idi] = 'fix'
@@ -107,7 +107,7 @@ function readtable, file, numcol=numcol, names=names, types=types, skip=skip, as
             idi = where(types eq '', cnt) & if cnt ne 0 then begin
                 if keyword_set(as_string) then ntypes[idi] = 'string' else ntypes[idi] = 'double'
             endif
-            
+
             vars = ntypes[0]+'(reform(res[0,*]))'
             if numcol gt 1 then vars += strjoin(', '+ntypes[lindgen(numcol-1)+1]+'(reform(res['+strna(lindgen(numcol-1)+1)+',*]))')
         endif else begin
