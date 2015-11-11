@@ -17,11 +17,11 @@
 ;
 pro binplot, x, y, z, numbins=numbins, xr=xr, yr=yr, zlog=zlog, dmap=dmap, median=median, levels=levels, $
     weighted=weighted, wlog=wlog, legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, ctitle=ctitle, $
-    charsize=charsize, noerase=noerase, lextra=lextra, _extra=cextra
-    
-    dmap = bin_map(x, y, z, numbins=numbins, xr=xr, yr=yr, median=median)
+    charsize=charsize, noerase=noerase, lextra=lextra, reduce=reduce, _extra=cextra
+
+    dmap = bin_map(x, y, z, numbins=numbins, xr=xr, yr=yr, median=median, reduce=reduce)
     if keyword_set(zlog) then dmap = alog10(dmap)
-    
+
     if keyword_set(weighted) then begin
         weight = density_map(x, y, numbins=numbins, xr=xr, yr=yr)
         if keyword_set(wlog) then weight = alog10(weight)
@@ -32,19 +32,19 @@ pro binplot, x, y, z, numbins=numbins, xr=xr, yr=yr, zlog=zlog, dmap=dmap, media
         mppos = bleg.plot_pos
         bppos = bleg.leg_pos
         tppos = bleg.tit_pos
-        
+
+        plot2d, dmap, levels=levels, noerase=noerase, /noplot, _extra=cextra
+
+        if provided(charsize) then lcs = charsize
         if provided(lextra) then begin
             wcs = where(tag_names(lextra) eq 'CHARSIZE', cnt)
-            if cnt eq 0 and provided(charsize) then lextra = create_struct(lextra, 'CHARSIZE', charsize)
+            if cnt ne 0 then lcs = lextra.(wcs[0])
         endif
-        
-        op = !p
-        plot2d, dmap, levels=levels, noerase=noerase, /noplot, _extra=cextra
+
         colegend, levels, /range, position=bppos, xtit=ctitle, bottom=lbottom, top=ltop, $
-            charsize=charsize, titpos=tppos, noerase=noerase, _extra=lextra
-        !p = op
+            charsize=lcs, titpos=tppos, noerase=noerase, _extra=lextra
     endif
-    
+
     plot2d, dmap, imgxrange=xr, imgyrange=yr, levels=levels, weight=weight, position=mppos, $
         charsize=charsize, noerase=(keyword_set(legend) or keyword_set(noerase)), _extra=cextra
 end
