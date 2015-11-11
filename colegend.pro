@@ -27,7 +27,7 @@ pro colegend, bins, range=range, xstyle=xstyle, xtickformat=xtickformat, top=top
     if keyword_set(range) then begin
         data = (bins.range[1] - bins.range[0])*findgen(255)/254.0 + bins.range[0]
         if keyword_set(llog) then data = alog10(data)
-        plot2d, transpose(areplicate(data,1)), imgyrange=[0,1], levels=bins, /uselevels, $
+        plot2d, transpose(areplicate(data,4)), imgyrange=[0,1], levels=bins, /uselevels, $
             imgxrange=bins.range, xtit=xtit, xstyle=xstyle, xtickformat=xtickformat, ytickformat='(A1)', $
             ytickinterval=1.0, yticks=1, yminor=1, position=position, charsize=charsize, _extra=extra
     endif else begin
