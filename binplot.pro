@@ -17,7 +17,8 @@
 ;
 pro binplot, x, y, z, numbins=numbins, xr=xr, yr=yr, zlog=zlog, dmap=dmap, median=median, levels=levels, $
     weighted=weighted, wlog=wlog, legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, ctitle=ctitle, $
-    charsize=charsize, noerase=noerase, lextra=lextra, reduce=reduce, _extra=cextra
+    charsize=charsize, noerase=noerase, lextra=lextra, reduce=reduce, xthick=xthick, ythick=ythick, $
+    _extra=cextra
 
     dmap = bin_map(x, y, z, numbins=numbins, xr=xr, yr=yr, median=median, reduce=reduce)
     if keyword_set(zlog) then dmap = alog10(dmap)
@@ -42,9 +43,11 @@ pro binplot, x, y, z, numbins=numbins, xr=xr, yr=yr, zlog=zlog, dmap=dmap, media
         endif
 
         colegend, levels, /range, position=bppos, xtit=ctitle, bottom=lbottom, top=ltop, $
-            charsize=lcs, titpos=tppos, noerase=noerase, _extra=lextra
+            charsize=lcs, titpos=tppos, noerase=noerase, xthick=xthick, ythick=ythick, $
+            _extra=lextra
     endif
 
     plot2d, dmap, imgxrange=xr, imgyrange=yr, levels=levels, weight=weight, position=mppos, $
-        charsize=charsize, noerase=(keyword_set(legend) or keyword_set(noerase)), _extra=cextra
+        charsize=charsize, noerase=(keyword_set(legend) or keyword_set(noerase)), $
+        xthick=xthick, ythick=ythick, _extra=cextra
 end

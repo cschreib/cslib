@@ -15,7 +15,7 @@
 ;     3: horizontal strips
 ;
 pro curve_fill, xdata, ydata, color=color, style=style, spacing=spacing, $
-    left=left, right=right, top=top, bottom=bottom, clim=clim
+    left=left, right=right, top=top, bottom=bottom, clim=clim, orientation=orientation
 
     if ~keyword_set(left) and ~keyword_set(right) and ~keyword_set(top) then bottom=1
 
@@ -62,11 +62,11 @@ pro curve_fill, xdata, ydata, color=color, style=style, spacing=spacing, $
     end
     1: begin
         line_fill = 1
-        orientation = 45.0
+        if n_elements(orientation) eq 0 then orientation = 45.0
     end
     2: begin
         line_fill = 1
-        orientation = -45.0
+        if n_elements(orientation) eq 0 then orientation = -45.0
     end
     3: begin
         line_fill = 1

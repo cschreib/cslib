@@ -34,7 +34,7 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
     if provided(xmin) then tmpmin = xmin else tmpmin = min(tldat)
     if provided(xmax) then tmpmax = xmax else tmpmax = max(tldat)
     if ~provided(cumul) then cumul = 0
-    if ~provided(count_limit) then count_limit = 0
+    if ~provided(count_limit) then count_limit = -1
 
     idok = where(finite(dat) and finite(tweight) and dat ge tmpmin and dat le tmpmax, cnt)
     if cnt eq 0 then return
@@ -51,9 +51,9 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
             numbins = ceil(datmax - datmin) + 1
             step = 1.0
         end else begin
-            datmin = tmpmin
-            datmax = tmpmax
-            if ~provided(numbins) then numbins = 10
+            datmin = 0.999*tmpmin
+            datmax = 1.001*tmpmax
+            if ~provided(numbins) then numbins = 10 else numbins = round(numbins)
             step = float(datmax - datmin)/numbins
         endelse
         bins = {low:fltarr(numbins), up:fltarr(numbins)}
@@ -85,9 +85,6 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
             endelse
 
             if count gt count_limit then begin
-                if arg_present(errors) then begin
-                    errors[b] = sqrt(total(tweight[ids]^2))
-                endif
 
                 factor = 1.0
                 if provided(perbin) then begin
@@ -102,7 +99,19 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
                     endelse
                 endif
 
-                ydata[b] = total(tweight[ids])/factor
+                if arg_present(errors) then begin
+                    if count eq 0 then begin
+                        errors[b] = mean(tweight)/factor
+                    endif else begin
+                        errors[b] = sqrt(total(tweight[ids]^2))/factor
+                    endelse
+                endif
+
+                if count ne 0 then begin
+                    count = total(tweight[ids])/factor
+                endif
+
+                ydata[b] = count
             endif
         endfor
     endif else begin
@@ -134,10 +143,6 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
             endelse
 
             if count gt count_limit then begin
-                if arg_present(errors) then begin
-                    errors[b] = sqrt(total(tweight[ids]^2))
-                endif
-
                 factor = 1.0
                 if provided(perbin) then begin
                     if size(perbin, /type) ge 1 and size(perbin, /type) le 3 then begin
@@ -151,7 +156,18 @@ pro histplot_makebins, dat, xdata, ydata, xmin=xmin, xmax=xmax, bins=bins, numbi
                     endelse
                 endif
 
-                count = total(tweight[ids])/factor
+                if arg_present(errors) then begin
+                    if count eq 0 then begin
+                        errors[b] = mean(tweight)/factor
+                    endif else begin
+                        errors[b] = sqrt(total(tweight[ids]^2))/factor
+                    endelse
+                endif
+
+                if count ne 0 then begin
+                    count = total(tweight[ids])/factor
+                endif
+
                 ydata[2*b+1] = count
                 ydata[2*b+2] = count
             endif

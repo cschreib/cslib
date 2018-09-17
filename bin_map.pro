@@ -25,9 +25,12 @@ function bin_map, x, y, z, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=yda
     xstep = (xr[1]-xr[0])/float(numbins[0])
     ystep = (yr[1]-yr[0])/float(numbins[1])
 
-    xdata = ceil(findgen(2*numbins[0])/2.0)*xstep + xr[0]
-    ydata = ceil(findgen(2*numbins[1])/2.0)*ystep + yr[0]
-    dmap  = fltarr(numbins[0]*2, numbins[1]*2)*!values.f_nan
+    ; xdata = ceil(findgen(2*numbins[0])/2.0)*xstep + xr[0]
+    ; ydata = ceil(findgen(2*numbins[1])/2.0)*ystep + yr[0]
+    xdata = findgen(numbins[0])*xstep + xr[0]
+    ydata = findgen(numbins[1])*ystep + yr[0]
+    ; dmap  = fltarr(numbins[0]*2, numbins[1]*2)*!values.f_nan
+    dmap  = fltarr(numbins[0], numbins[1])*!values.f_nan
 
     for xi=0L, numbins[0]-1 do begin
         tmp1 = where(xr[0]+xi*xstep le x and x lt xr[0]+(xi+1)*xstep, cnt)
@@ -50,10 +53,11 @@ function bin_map, x, y, z, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=yda
                 val = !values.f_nan
             endelse
 
-            dmap[2*xi+0, 2*yi+0] = val
-            dmap[2*xi+1, 2*yi+0] = val
-            dmap[2*xi+0, 2*yi+1] = val
-            dmap[2*xi+1, 2*yi+1] = val
+            ; dmap[2*xi+0, 2*yi+0] = val
+            ; dmap[2*xi+1, 2*yi+0] = val
+            ; dmap[2*xi+0, 2*yi+1] = val
+            ; dmap[2*xi+1, 2*yi+1] = val
+            dmap[xi, yi] = val
         endfor
     endfor
 

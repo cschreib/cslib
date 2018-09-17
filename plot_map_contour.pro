@@ -1,7 +1,8 @@
 pro plot_map_contour, img, src_ast, dst_ast, levels=levels, uselevels=uselevels, $
-    range=range, nlevel=nlevel, sigma=sigma, binary=binary, _extra=extra
+    range=range, nlevel=nlevel, sigma=sigma, binary=binary, _extra=extra, filled=filled, $
+    fill_extra=fill_extra
 
-    if ~provided(levels) or ~keyword_set(use_levels) then begin
+    if ~provided(levels) or ~keyword_set(uselevels) then begin
         if keyword_set(binary) then begin
             levels = [0,1]
         endif else begin
@@ -50,6 +51,10 @@ pro plot_map_contour, img, src_ast, dst_ast, levels=levels, uselevels=uselevels,
 
         if p.type eq 1 then begin
             x = [x, x[0]] & y = [y, y[0]]
+        endif
+
+        if keyword_set(filled) then begin
+            polyfill, x, y, _extra=fill_extra
         endif
 
         oplot, x, y, _extra=extra

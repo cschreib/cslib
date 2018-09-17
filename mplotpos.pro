@@ -27,8 +27,8 @@ function mplotpos, multi=multi, charsize=charsize, xmargin=xmargin, ymargin=ymar
     endif
 
     if provided(pos) then begin
-        if n_elements(pos) eq 1 then cpid = pos[0] else begin
-            cpid = pos[0] + pos[1]*cmulti[0]
+        if n_elements(pos) eq 1 then cpid = long(pos[0]) else begin
+            cpid = long(pos[0] + pos[1]*cmulti[0])
         endelse
         reset = 0
         !p.noerase = cpid ne 0
@@ -41,7 +41,7 @@ function mplotpos, multi=multi, charsize=charsize, xmargin=xmargin, ymargin=ymar
     endif
 
     if provided(multi) then begin
-        cmulti = multi
+        cmulti = long(multi)
         cpid = 0
         !p.noerase = 1
     endif

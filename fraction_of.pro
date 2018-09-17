@@ -6,7 +6,7 @@ function fraction_of, x, among=among, percent=percent
     endelse
 
     if keyword_set(percent) then begin
-        return, strn(round(1000*res)/10.0, format='(F4.1)')+'%'
+        return, strn(round(1000*res)/10.0, format='(F5.1)')+'%'
     endif else begin
         return, res
     endelse

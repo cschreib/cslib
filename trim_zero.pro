@@ -26,6 +26,7 @@ function trim_zero, value
     if str[i] eq byte('-') or str[i] eq byte('+') then begin
         sign = string(str[i])
         i++
+        ie--
     endif else begin
         sign = ''
     endelse

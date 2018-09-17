@@ -10,7 +10,7 @@
 function strna, numbers, _extra=sextra
     if n_elements(numbers) eq 1 then return, strn(numbers, _extra=sextra)
     nn = n_elements(numbers)
-    res = make_array(size=size(numbers), type=7)
+    res = make_array(dim=size(numbers, /dim), type=7)
     for i=0L, nn-1L do res[i] = strn(numbers[i], _extra=sextra)
     return, res
 end

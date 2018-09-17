@@ -1,11 +1,20 @@
 pro histrplot, data, sel, _extra=extra, bins=bins, xdata=xdata, ydata=ydata, nodata=nodata, $
-    yrange=yrange, xrange=xrange, xlog=xlog, percent=percent, fill=fill
+    yrange=yrange, xrange=xrange, xlog=xlog, percent=percent, fill=fill, cumul=cumul, $
+    continuous=continuous, normalize=normalize
 
-    ohistplot, data, _extra=extra, xlog=xlog, bins=bins, xdata=xdata, ydata=ydata, /nodata
-    ohistplot, data, weight=sel, xlog=xlog, bins=bins, /usebins, ydata=ysdata, /nodata
+    ohistplot, data, _extra=extra, xlog=xlog, bins=bins, xdata=xdata, ydata=ydata, /nodata, $
+        cumul=cumul, continuous=continuous
+    ohistplot, data, weight=sel, xlog=xlog, bins=bins, /usebins, ydata=ysdata, /nodata, $
+        cumul=cumul, continuous=continuous
 
     idnz = where(ydata ne 0, cnt)
     if cnt ne 0 then ydata[idnz] = ysdata[idnz]/double(ydata[idnz])
+
+    if keyword_set(normalize) and provided(cumul) then begin
+        if cumul eq 1 then ydata /= ydata[n_elements(ydata)-1]
+        if cumul eq -1 then ydata /= ydata[0]
+    endif
+
     if keyword_set(percent) then ydata *= 100.0
 
     if ~provided(yrange) then yrange = [0, max(ydata)]

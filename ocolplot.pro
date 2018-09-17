@@ -25,7 +25,7 @@ pro ocolplot, xdata, ydata, coldata, psym=psym, symsize=symsize, nodata=nodata, 
     thick=thick, range=range, reverse=reverse, random=random, openrange=openrange
 
     if ~provided(psym) then psym = 3
-    if ~provided(coltable) then coltable = [color(255,0,0), color(0,0,255)]
+    if ~provided(coltable) then coltable = 'viridis'
     if size(coltable, /tname) eq 'STRING' then coltable = color_rainbow(table=coltable)
     if provided(tnumbins) then numbins = tnumbins
 

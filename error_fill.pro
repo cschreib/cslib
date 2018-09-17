@@ -38,14 +38,38 @@ pro error_fill, x, yl, yu, color=color, style=style, spacing=spacing, bars=bars,
     tyu = yu > yl
     tyl = yu < yl
 
-    tx = [reform(x), reverse(reform(x))]
-    ty = [reform(tyu), reverse(reform(tyl))]
+    good = finite(yl) and finite(yu) and finite(x)
 
-    polyfill, tx, ty, color=color, line_fill=line_fill, orientation=orientation, $
-        spacing=spacing, noclip=0
+    wasgood = 0
+    lastgood = 0
+    for i=0, n_elements(x)-1 do begin
+        if good[i] ne wasgood then begin
+            if good[i] then begin
+                lastgood = i
+            endif else begin
+                j = lastgood
+                tx = [reform(x[j:i-1]), reverse(reform(x[j:i-1]))]
+                ty = [reform(tyu[j:i-1]), reverse(reform(tyl[j:i-1]))]
+
+                polyfill, tx, ty, color=color, line_fill=line_fill, orientation=orientation, $
+                    spacing=spacing, noclip=0
+            endelse
+
+            wasgood = good[i]
+        endif
+    endfor
+
+    if wasgood then begin
+        j = lastgood
+        tx = [reform(x[j:*]), reverse(reform(x[j:*]))]
+        ty = [reform(tyu[j:*]), reverse(reform(tyl[j:*]))]
+
+        polyfill, tx, ty, color=color, line_fill=line_fill, orientation=orientation, $
+            spacing=spacing, noclip=0
+    endif
 
     if keyword_set(bars) then begin
         if ~provided(bcolor) and provided(color) then bcolor = color
-        errplot, tx, tyu, tyl, color=bcolor, _extra=extra
+        errplot, x, tyu, tyl, color=bcolor, _extra=extra
     endif
 end

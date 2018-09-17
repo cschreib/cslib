@@ -46,26 +46,6 @@ pro colegend, bins, range=range, xstyle=xstyle, xtickformat=xtickformat, top=top
         plot, bins.low, bins.low, /nodata, /noerase, xr=xr, xstyle=xstyle, yr=[0,1], ytickinterval=1.0, $
             xtit=xtit, xtickformat=xtickformat, ytickname=[' ',' '], $
             yticks=1, yminor=1, position=position, charsize=charsize, xlog=llog, _extra=extra
-
-        ; col = bins.color
-        ; cdata = fltarr(n_elements(bins.low)+1, 2)
-        ; cdata[0,*] = [bins.low[0], bins.low[0]]
-        ; cdata[lindgen(n_elements(bins.low))+1,*] = [bins.up, bins.up]
-
-        ; xdata = cdata[*,0]
-        ; ydata = [0,1]
-
-        ; stop
-        ; if xdata[1] - xdata[0] lt 0 then begin
-        ;     xdata = reverse(xdata)
-        ;     ydata = reverse(ydata)
-        ;     cdata = reverse(cdata)
-        ;     col = reverse(col)
-        ; endif
-
-        ; contour, cdata, xdata, ydata, levels=xdata, nlevel=n_elements(col), /cell_fill, c_colors=col, $
-        ;     ytickinterval=1.0, xtit=xtit, xstyle=xstyle, xtickformat=xtickformat, ytickname=[' ',' '], $
-        ;     yticks=1, yminor=1, position=position, charsize=charsize, xlog=llog, _extra=extra
     endelse
 
     if ~keyword_set(bottom) then begin

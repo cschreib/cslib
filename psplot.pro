@@ -38,9 +38,10 @@
 ;     small compared to other fonts, decrease this value to, say, 0.5, and try again until you reach
 ;     a satisfactory result. For example, I use 0.6 for the DejaVu font.
 ;
-function psplot, file, dim, reset=reset, hfont=hfont, ttf=ttf
+function psplot, file, dim, reset=reset, hfont=hfont, ttf=ttf, noraster=noraster
     common psplot_com, started, oldp, oldx, oldy
     if n_elements(started) eq 0 then started = 0
+    if n_elements(noraster) eq 0 then noraster = 1
 
     if started eq 1 or keyword_set(reset) then begin
         device, /close
@@ -52,8 +53,18 @@ function psplot, file, dim, reset=reset, hfont=hfont, ttf=ttf
         !p.color = 'ffffff'x
         started = 0
         void = mplotpos()
+
+        ; Apply a fix to generated EPS files to add a 'showpage'
+        ; command at the end of the file. This is a workaround for a libspectre bug:
+        ; https://bugs.launchpad.net/ubuntu/+source/evince/+bug/1348384
+        defsysv, '!psplot_fix_eps', exists=fexist
+        if fexist and n_elements(file) ne 0 then begin
+            if !psplot_fix_eps then begin
+                spawn, 'idl-fix-eps '+file
+            endif
+        endif
     endif else begin
-        set_plot, 'ps'
+        set_plot, 'ps', /interpolate
 
         if n_elements(ttf) eq 0 then begin
             fexist = 0
@@ -66,14 +77,40 @@ function psplot, file, dim, reset=reset, hfont=hfont, ttf=ttf
         endif
 
         if ~keyword_set(hfont) then font = ttf
-        device, filename=file, /encapsulated, xsize=dim[0], ysize=dim[1], set_font=font, $
-            /color, /decomposed, tt_font=~keyword_set(hfont), /isolatin1
+
+        fexist = 0
+        defsysv, '!datalanguage', exists=fexist
+        if fexist then begin
+            dl = !datalanguage
+        endif else begin
+            dl = 'IDL'
+        endelse
+
+        if dl eq 'GDL' then begin
+            device, filename=file, xsize=dim[0], ysize=dim[1],  $
+                /color, /decomposed, /encapsulated, bits_per_pixel=8
+        endif else begin ; IDL
+            if keyword_set(noraster) then begin
+                device, filename=file, xsize=dim[0], ysize=dim[1], /HELVETICA, $
+                    /color, /decomposed, /encapsulated, bits_per_pixel=8, /isolatin1, /tt_font
+            endif else begin
+                device, filename=file, xsize=dim[0], ysize=dim[1], set_font=font, $
+                    /color, /decomposed, /encapsulated, bits_per_pixel=8, tt_font=~keyword_set(hfont), /isolatin1
+            endelse
+        endelse
+
+
         oldp = !p
         oldx = !x
         oldy = !y
+
         !p.background = 'ffffff'x
         !p.color = 0
-        if ~keyword_set(hfont) then !p.font = 1
+        if ~keyword_set(hfont) then !p.font = ~keyword_set(noraster)
+        if keyword_set(noraster) then !p.charsize = 0.8
+        !x.thick = 3
+        !y.thick = 3
+
         started = 1
     endelse
 

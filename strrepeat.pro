@@ -6,7 +6,7 @@
 ;
 function strrepeat, str, cnt
     if cnt ne 0 then begin
-        return, string(replicate(str, cnt), format='('+string(cnt)+'A)')
+        return, string(replicate(str, cnt), format='('+strn(cnt)+'A)')
     endif else begin
         return, ''
     endelse

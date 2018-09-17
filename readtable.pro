@@ -20,8 +20,23 @@
 ;           'S' (string), '' (default type). Note that if one wants to obtain string values ('S'),
 ;           one has to set the 'as_string' keyword (it will also be faster in any case).
 ;
-function readtable, file, numcol=numcol, names=names, types=types, skip=skip, as_string=as_string
+function readtable, file, numcol=numcol, names=names, types=types, skip=skip, noautoskip=noautoskip, as_string=as_string
     openr, lun, file, /get_lun
+
+    ; Skip lines starting with '#'
+    if ~keyword_set(noautoskip) and n_elements(skip) eq 0 then begin
+        skip = 0
+        line = ''
+        while ~eof(lun) do begin
+            readf, lun, line
+            if strpos(strtrim(line), '#') ne 0 then begin
+                break
+            endif
+            ++skip
+        endwhile
+
+        point_lun, lun, 0
+    endif
 
     ; Skip the first lines if asked
     if n_elements(skip) ne 0 then skip_lun, lun, skip, /lines
