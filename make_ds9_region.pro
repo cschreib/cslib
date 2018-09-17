@@ -1,12 +1,17 @@
-pro make_ds9_region, file, ra, dec, text=text, color=color, size=size
+pro make_ds9_region, file, ra, dec, text=text, color=color, size=size, physical=physical
     openw, lun, /get_lun, file
 
     printf, lun, '# Region file format: DS9 version 4.1'
     printf, lun, 'global color=green dashlist=8 3 width=2 font="helvetica 10 normal roman"'+$
             'select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1'
-    printf, lun, 'fk5'
+    if keyword_set(physical) then begin
+        printf, lun, 'physical'
+        sex = [[strna(ra)], [strna(dec)]]
+    endif else begin
+        printf, lun, 'fk5'
+        sex = radectosex(ra, dec)
+    endelse
 
-    sex = radectosex(ra, dec)
     if provided(text) then begin
         txt = text
         if size(txt, /type) eq size(1, /type) and n_elements(txt) eq 1 then $
