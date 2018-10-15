@@ -6,21 +6,9 @@ function weighted_percentile, x, w, p
     sid = sort(tx)
     tx = tx[sid] & tw = tw[sid]
 
-    nx = n_elements(tx)
-    if nx eq 1 then return, tx[0]
+    tcw = cumul(tw)
+    tcw /= tcw[-1]
 
-    nid = long(nx*p)
-    tot = total(tw)
-    if tot eq 0.0 then return, !values.f_nan
-
-    if total(tw[0:nid]) gt tot*p then begin
-        if nid eq 0 then return, tx[0]
-        nid--
-        while total(tw[0:nid]) gt tot*p and nid ne 0 do nid--
-        nid++
-    endif else begin
-        while total(tw[0:nid]) le tot*p and nid ne nx-1 do nid++
-    endelse
-
-    return, tx[nid]
+    idp = round(interpol(dindgen(cnt), tcw, p)) > 0 < (cnt-1)
+    return, tx[idp]
 end

@@ -14,52 +14,33 @@
 ;  - xdata: [output] the 'x' axis points corresponding to the returned array
 ;  - ydata: [output] the 'y' axis points corresponding to the returned array
 ;
-function bin_map, x, y, z, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=ydata, median=median, reduce=reduce
+function bin_map, x, y, z, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=ydata, $
+    median=median, reduce=reduce, weight=weight
 
-    if ~provided(numbins) then numbins = [20, 20] else $
-        if n_elements(numbins) eq 1 then numbins = [numbins, numbins]
-
-    if ~provided(xr) then xr = [min(x), max(x)]
-    if ~provided(yr) then yr = [min(y), max(y)]
-
-    xstep = (xr[1]-xr[0])/float(numbins[0])
-    ystep = (yr[1]-yr[0])/float(numbins[1])
-
-    ; xdata = ceil(findgen(2*numbins[0])/2.0)*xstep + xr[0]
-    ; ydata = ceil(findgen(2*numbins[1])/2.0)*ystep + yr[0]
-    xdata = findgen(numbins[0])*xstep + xr[0]
-    ydata = findgen(numbins[1])*ystep + yr[0]
-    ; dmap  = fltarr(numbins[0]*2, numbins[1]*2)*!values.f_nan
-    dmap  = fltarr(numbins[0], numbins[1])*!values.f_nan
-
-    for xi=0L, numbins[0]-1 do begin
-        tmp1 = where(xr[0]+xi*xstep le x and x lt xr[0]+(xi+1)*xstep, cnt)
-        if cnt eq 0 then continue
-        for yi=0L, numbins[1]-1 do begin
-            tmp2 = where(yr[0]+yi*ystep le y[tmp1] and y[tmp1] lt yr[0]+(yi+1)*ystep, cnt)
-            if cnt ne 0 then begin
-                if keyword_set(median) then begin
-                    ; Do median
-                    val = median(z[tmp1[tmp2]])
-                endif else if provided(reduce) then begin
-                    ; Do custom stuff
-                    v = z[tmp1[tmp2]]
-                    void = execute('val = '+reduce)
-                endif else begin
-                    ; Just do mean
-                    val = mean(z[tmp1[tmp2]])
-                endelse
-            endif else begin
-                val = !values.f_nan
-            endelse
-
-            ; dmap[2*xi+0, 2*yi+0] = val
-            ; dmap[2*xi+1, 2*yi+0] = val
-            ; dmap[2*xi+0, 2*yi+1] = val
-            ; dmap[2*xi+1, 2*yi+1] = val
-            dmap[xi, yi] = val
-        endfor
-    endfor
-
-    return, dmap
+    if n_elements(weight) ne 0 then begin
+        if n_elements(reduce) eq 0 then begin
+            return, density_map(x, y, xr=xr, yr=yr, xdata=ydata, ydata=ydata, numbins=numbins, $
+                /continuous, data={data:z, weight:weight}, $
+                operation='total(data.data[ids]*data.weight[ids])/total(data.weight[ids])')
+        endif else if keyword_set(median) then begin
+            return, density_map(x, y, xr=xr, yr=yr, xdata=ydata, ydata=ydata, numbins=numbins, $
+                /continuous, data={data:z, weight:weight}, $
+                operation='weighted_median(data.data[ids], data.weight[ids])')
+        endif else begin
+            return, density_map(x, y, xr=xr, yr=yr, xdata=ydata, ydata=ydata, numbins=numbins, $
+                /continuous, data={data:z, weight:weight}, $
+                operation=reduce)
+        endelse
+    endif else begin
+        if n_elements(reduce) eq 0 then begin
+            return, density_map(x, y, xr=xr, yr=yr, xdata=ydata, ydata=ydata, numbins=numbins, $
+                /continuous, data=z, operation='mean(data[ids])')
+        endif else if keyword_set(median) then begin
+            return, density_map(x, y, xr=xr, yr=yr, xdata=ydata, ydata=ydata, numbins=numbins, $
+                /continuous, data=z, operation='median(data[ids])')
+        endif else begin
+            return, density_map(x, y, xr=xr, yr=yr, xdata=ydata, ydata=ydata, numbins=numbins, $
+                /continuous, data=z, operation=reduce)
+        endelse
+    endelse
 end

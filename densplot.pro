@@ -20,9 +20,11 @@
 pro densplot, x, y, numbins=numbins, xr=xr, yr=yr, log=log, smooth=smooth, normalized=normalized, $
         dmap=dmap, weight=weight, levels=levels, legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, $
         position=position, ctitle=ctitle, charsize=charsize, noerase=noerase, lextra=lextra, $
-        _extra=cextra
+        xdata=xdata, ydata=ydata, _extra=cextra
 
-    dmap = density_map(x, y, numbins=numbins, smooth=smooth, normalized=normalized, weight=weight, xr=xr, yr=yr)
+    dmap = density_map(x, y, numbins=numbins, smooth=smooth, normalized=normalized, $
+        weight=weight, xr=xr, yr=yr, xdata=xdata, ydata=ydata)
+
     if keyword_set(log) then dmap = alog10(dmap + 1)
 
     if keyword_set(legend) then begin

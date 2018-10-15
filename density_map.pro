@@ -20,7 +20,8 @@
 ;                relative to the total number of elements in the considered sample
 ;
 function density_map, x, y, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=ydata, $
-    continuous=continuous, smooth=smooth, normalized=normalized, weight=weight
+    continuous=continuous, smooth=smooth, normalized=normalized, weight=weight, $
+    operation=operation, data=data, default=default
 
     if ~provided(numbins) then numbins = [20, 20] else $
         if n_elements(numbins) eq 1 then numbins = [numbins, numbins]
@@ -38,23 +39,31 @@ function density_map, x, y, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=yd
 
     xdata = (findgen(numbins[0]) + 0.5)*xstep + xr[0]
     ydata = (findgen(numbins[1]) + 0.5)*ystep + yr[0]
-    if dosmooth or provided(weight) then begin
-        dmap = fltarr(numbins[0], numbins[1])
+    if dosmooth or provided(weight) or provided(operation) then begin
+        dmap = dblarr(numbins[0], numbins[1])
     endif else begin
         dmap = lonarr(numbins[0], numbins[1])
     endelse
+
+    if provided(default) then dmap[*,*] = default
 
     factor = 0.0
     void = histogram(x, binsize=xstep, nbins=numbins[0], min=xr[0], reverse=rix)
     for xi=0L, numbins[0]-1 do begin
         if rix[xi] eq rix[xi+1] then continue
         tmp1 = rix[rix[xi]:rix[xi+1]-1]
-        if provided(weight) then begin
+        if provided(weight) or provided(operation) then begin
             void = histogram(y[tmp1], binsize=ystep, nbins=numbins[1], min=yr[0], reverse=riy)
             for yi=0L, numbins[1]-1 do begin
                 if riy[yi] eq riy[yi+1] then continue
                 tmp2 = riy[riy[yi]:riy[yi+1]-1]
-                dmap[xi,yi] = total(weight[tmp1[tmp2]])
+                if provided(weight) then begin
+                    dmap[xi,yi] = total(weight[tmp1[tmp2]])
+                endif else begin
+                    ids = tmp1[tmp2]
+                    void = execute('tmp = '+operation)
+                    dmap[xi,yi] = tmp
+                endelse
                 factor += n_elements(tmp2)
             endfor
         endif else begin

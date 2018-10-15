@@ -22,10 +22,12 @@ pro colplot, xdata, ydata, coldata, psym=psym, symsize=symsize, nodata=nodata, n
     coltable=coltable, linearbins=linearbins, bins=bins, usebins=usebins, position=position, $
     legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, llog=llog, ctitle=ctitle, range=range, $
     charsize=charsize, noerase=noerase, lextra=lextra, linestyle=linestyle, thick=thick, $
-    reverse=reverse, random=random, openrange=openrange, _extra=cpextra
+    reverse=reverse, random=random, openrange=openrange, inset_legend=inset_legend, _extra=cpextra
 
     if keyword_set(legend) then begin
-        bleg = bake_legend(top=ltop, bottom=lbottom, width=lwidth, title=provided(ctitle))
+        bleg = bake_legend(top=ltop, bottom=lbottom, width=lwidth, title=provided(ctitle), $
+            inset_legend=inset_legend)
+
         mppos = bleg.plot_pos
         bppos = bleg.leg_pos
         tppos = bleg.tit_pos

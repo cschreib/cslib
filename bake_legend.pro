@@ -10,48 +10,66 @@ end
 ;  - title: set this keyword if you want to add a title to the legend, so that some space is
 ;           reserved for it
 ;
-function bake_legend, top=top, bottom=bottom, width=width, title=title
+function bake_legend, top=top, bottom=bottom, width=width, title=title, inset_legend=inset_legend
     if ~provided(width) then width = 1
+
     if keyword_set(title) then begin
         if keyword_set(bottom) then begin
-            bmargin = 2
-            tmargin = 0
+            ttmargin = [2,0]
         endif else begin
-            bmargin = 0
-            tmargin = 2
+            ttmargin = [0,2]
         endelse
     endif else begin
-        tmargin = 0
-        bmargin = 0
+        ttmargin = [0,0]
     endelse
 
-    tppos = getplotpos()
+    ; Compute total legend bar width
+    twidth = width
+    if keyword_set(bottom) then twidth += 4
+    tlmargin = [0,0]
+    tlmargin[~keyword_set(bottom)] = twidth
+
+    ; Store allocated plot area
     oy = !y
-    !y.margin = [oy.margin[0]+bmargin, oy.margin[1]+tmargin]
-    oppos = getplotpos()
 
-    if keyword_set(bottom) then begin
-        tppos = tppos[1]
-
-        !y.margin = [oy.margin[0]+bmargin+4+width, oy.margin[1]+tmargin]
-        mppos = getplotpos()
-        mppos[0] = oppos[0] & mppos[2] = oppos[2]
-
-        !y.margin = [oy.margin[0]+bmargin+width+tmargin, oy.margin[1]+tmargin]
-        bppos = getplotpos()
-        bppos[0] = oppos[0] & bppos[2] = oppos[2]
-        bppos[3] = bppos[1] & bppos[1] = oppos[1]
+    ; Compute margins
+    if keyword_set(inset_legend) then begin
+        pmargin = !y.margin
+        lmargin = !y.margin - tlmargin
+        tmargin = !y.margin - tlmargin - ttmargin
     endif else begin
-        tppos = tppos[3]
-
-        !y.margin = [oy.margin[0]+bmargin, oy.margin[1]+width+tmargin]
-        mppos = getplotpos()
-        mppos[0] = oppos[0] & mppos[2] = oppos[2]
-
-        bppos = mppos
-        bppos[1] = mppos[3] & bppos[3] = oppos[3]
+        pmargin = !y.margin + tlmargin + ttmargin
+        lmargin = !y.margin + ttmargin
+        tmargin = !y.margin
     endelse
 
+    ; Get plot positions
+    !y.margin = tmargin
+    tpos = getplotpos()
+    !y.margin = lmargin
+    lpos = getplotpos()
+    !y.margin = pmargin
+    ppos = getplotpos()
+
+    ; Get title position
+    if keyword_set(bottom) then begin
+        tppos = tpos[1]
+    endif else begin
+        tppos = tpos[3]
+    endelse
+
+    ; Get legend position
+    bppos = lpos
+    if keyword_set(bottom) then begin
+        bppos[3] = ppos[1]
+    endif else begin
+        bppos[1] = ppos[3]
+    endelse
+
+    ; Get plot position
+    mppos = ppos
+
+    ; Restore plotting state
     !y = oy
 
     return, {plot_pos:mppos, leg_pos:bppos, tit_pos:tppos}

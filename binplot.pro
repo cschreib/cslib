@@ -16,18 +16,12 @@
 ;  - + all keywords available to 'plot2d'
 ;
 pro binplot, x, y, z, numbins=numbins, xr=xr, yr=yr, zlog=zlog, dmap=dmap, median=median, levels=levels, $
-    weighted=weighted, wlog=wlog, legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, ctitle=ctitle, $
+    weight=weight, wlog=wlog, legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, ctitle=ctitle, $
     charsize=charsize, noerase=noerase, lextra=lextra, reduce=reduce, xthick=xthick, ythick=ythick, $
     _extra=cextra
 
-    dmap = bin_map(x, y, z, numbins=numbins, xr=xr, yr=yr, median=median, reduce=reduce)
+    dmap = bin_map(x, y, z, numbins=numbins, xr=xr, yr=yr, median=median, reduce=reduce, weight=weight)
     if keyword_set(zlog) then dmap = alog10(dmap)
-
-    if keyword_set(weighted) then begin
-        weight = density_map(x, y, numbins=numbins, xr=xr, yr=yr)
-        if keyword_set(wlog) then weight = alog10(weight)
-    endif
-
     if keyword_set(legend) then begin
         bleg = bake_legend(top=ltop, bottom=lbottom, width=lwidth, title=provided(ctitle))
         mppos = bleg.plot_pos
@@ -47,7 +41,7 @@ pro binplot, x, y, z, numbins=numbins, xr=xr, yr=yr, zlog=zlog, dmap=dmap, media
             _extra=lextra
     endif
 
-    plot2d, dmap, imgxrange=xr, imgyrange=yr, levels=levels, weight=weight, position=mppos, $
+    plot2d, dmap, imgxrange=xr, imgyrange=yr, levels=levels, position=mppos, $
         charsize=charsize, noerase=(keyword_set(legend) or keyword_set(noerase)), $
         xthick=xthick, ythick=ythick, _extra=cextra
 end
