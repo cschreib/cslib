@@ -34,8 +34,8 @@ function density_map, x, y, numbins=numbins, xr=xr, yr=yr, xdata=xdata, ydata=yd
         if smooth ne 0 then dosmooth = 1
     endif
 
-    xstep = (xr[1]-xr[0])/float(numbins[0]-1)
-    ystep = (yr[1]-yr[0])/float(numbins[1]-1)
+    xstep = (xr[1]-xr[0])/float(numbins[0])
+    ystep = (yr[1]-yr[0])/float(numbins[1])
 
     xdata = (findgen(numbins[0]) + 0.5)*xstep + xr[0]
     ydata = (findgen(numbins[1]) + 0.5)*ystep + yr[0]

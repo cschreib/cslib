@@ -40,8 +40,13 @@ pro plot_map_contour, img, src_ast, dst_ast, levels=levels, uselevels=uselevels,
 
     if n_elements(path) eq 0 then return
 
-    xy2ad, reform(path[0,*]), reform(path[1,*]), src_ast, path_ra, path_dec
-    ad2xy, path_ra, path_dec, dst_ast, path_x, path_y
+    if n_elements(src_ast) eq 0 and n_elements(dst_ast) eq 0 then begin
+        path_x = reform(path[0,*])
+        path_y = reform(path[1,*])
+    endif else begin
+        xy2ad, reform(path[0,*]), reform(path[1,*]), src_ast, path_ra, path_dec
+        ad2xy, path_ra, path_dec, dst_ast, path_x, path_y
+    endelse
 
     npath = n_elements(info)
     for i=0, npath-1 do begin

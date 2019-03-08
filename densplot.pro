@@ -20,12 +20,17 @@
 pro densplot, x, y, numbins=numbins, xr=xr, yr=yr, log=log, smooth=smooth, normalized=normalized, $
         dmap=dmap, weight=weight, levels=levels, legend=legend, lbottom=lbottom, ltop=ltop, lwidth=lwidth, $
         position=position, ctitle=ctitle, charsize=charsize, noerase=noerase, lextra=lextra, $
-        xdata=xdata, ydata=ydata, _extra=cextra
+        xdata=xdata, ydata=ydata, zero_as_nan=zero_as_nan, _extra=cextra
 
     dmap = density_map(x, y, numbins=numbins, smooth=smooth, normalized=normalized, $
         weight=weight, xr=xr, yr=yr, xdata=xdata, ydata=ydata)
 
     if keyword_set(log) then dmap = alog10(dmap + 1)
+
+    if keyword_set(zero_as_nan) then begin
+        idz = where(dmap eq 0.0, cnt)
+        if cnt ne 0 then dmap[idz] = !values.f_nan
+    endif
 
     if keyword_set(legend) then begin
         bleg = bake_legend(top=ltop, bottom=lbottom, width=lwidth, title=provided(ctitle))
